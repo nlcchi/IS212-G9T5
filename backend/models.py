@@ -67,30 +67,6 @@ class WFHRequests(db.Model):
             "request_reason": self.request_reason
         }
 
-# WFHRequestDates Table (Stores the specific dates for both Ad-hoc and Recurring requests)
-class WFHRequestDates(db.Model):
-    __tablename__ = 'work_from_home_request_dates'
-
-    date_id = Column(Integer, primary_key=True)
-    request_id = Column(Integer, ForeignKey('work_from_home_requests.request_id'), nullable=False)
-    specific_date = Column(Date, nullable=False)  # The specific work-from-home date
-    staff_id = Column(Integer, ForeignKey('employee.staff_id'), nullable=False)
-    is_am = Column(Boolean, nullable=False, default=False)  # Is AM selected for this date?
-    is_pm = Column(Boolean, nullable=False, default=False)  # Is PM selected for this date?
-
-    work_from_home_request = db.relationship('WFHRequests')
-    employee = db.relationship('Employee')
-
-    def json(self):
-        return {
-            "date_id": self.date_id,
-            "request_id": self.request_id,
-            "specific_date": str(self.specific_date),
-            "staff_id": self.staff_id,
-            "is_am": self.is_am,
-            "is_pm": self.is_pm
-        }
-
 # RequestDecisions Table (Stores the decision made by the manager for the requests)
 class RequestDecisions(db.Model):
     __tablename__ = 'requestdecisions'
@@ -99,7 +75,7 @@ class RequestDecisions(db.Model):
     request_id = Column(Integer, ForeignKey('work_from_home_requests.request_id'), nullable=False)
     manager_id = Column(Integer, ForeignKey('employee.staff_id'), nullable=False)  # Manager who made the decision
     decision_date = Column(Date, nullable=False)
-    decision_status = Column(Enum('Approved', 'Rejected', name='decision_status'), nullable=False)
+    decision_status = Column(Enum('Approved', 'Rejected', 'Withdrawn', name='decision_status'), nullable=False)
     decision_notes = Column(Text, nullable=True)
 
     work_from_home_request = db.relationship('WFHRequests')
@@ -113,4 +89,31 @@ class RequestDecisions(db.Model):
             "decision_date": str(self.decision_date),
             "decision_status": self.decision_status,
             "decision_notes": self.decision_notes
+        }
+    
+# WFHRequestDates Table (Stores the specific dates for both Ad-hoc and Recurring requests)
+class WFHRequestDates(db.Model):
+    __tablename__ = 'work_from_home_request_dates'
+
+    date_id = Column(Integer, primary_key=True)
+    request_id = Column(Integer, ForeignKey('work_from_home_requests.request_id'), nullable=False)
+    specific_date = Column(Date, nullable=False)  # The specific work-from-home date
+    staff_id = Column(Integer, ForeignKey('employee.staff_id'), nullable=False)
+    decision_status = Column(Enum('Approved', 'Rejected', 'Withdrawn', name='decision_status'), ForeignKey('requestdecisions.decision_status'), nullable=False)
+    is_am = Column(Boolean, nullable=False, default=False)  # Is AM selected for this date?
+    is_pm = Column(Boolean, nullable=False, default=False)  # Is PM selected for this date?
+
+    work_from_home_request = db.relationship('WFHRequests')
+    employee = db.relationship('Employee')
+    request_decisions = db.relationship('RequestDecisions')
+
+    def json(self):
+        return {
+            "date_id": self.date_id,
+            "request_id": self.request_id,
+            "specific_date": str(self.specific_date),
+            "staff_id": self.staff_id,
+            "decision_status": self.decision_status,
+            "is_am": self.is_am,
+            "is_pm": self.is_pm
         }

@@ -68,7 +68,7 @@ def manager_approve_adhoc():
         if "error" in decision:
             return jsonify(decision), 500
         
-        wfh_date = add_approved_date(new_req['new_request'])
+        wfh_date = add_approved_date(new_req['new_request'], decision["decision"]["decision_status"])
         if "error" in wfh_date:
             return jsonify(wfh_date), 500 
         
