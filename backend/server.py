@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from models import db
 from routes.config import config
 from routes.employee import employee
-from routes.wfh_dates import dates
+from routes.wfh_requests import dates
 from routes.staff_apply import apply
 from routes.manager_approve import approve
 from routes.staff_requests import requests
